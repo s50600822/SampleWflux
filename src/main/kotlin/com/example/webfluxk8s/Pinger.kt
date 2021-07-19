@@ -18,7 +18,7 @@ class Pinger(val webClient: WebClient) {
     }
 
     fun ping(client: WebClient){
-        interval(ofMillis(20000))
+        interval(ofMillis(200))
             .take(1)
             .parallel()
             .runOn(Schedulers.boundedElastic())// REQUIRED FOR PARALLEL CALL

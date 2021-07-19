@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
+    <property resource="git.properties"/>
     <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
         <encoder class="net.logstash.logback.encoder.LogstashEncoder">
             <customFields>{"commit" : "${git.commit.id}", "customer":"X", "appname":"Y", "environment":"dev"}</customFields>

@@ -13,6 +13,7 @@ import java.util.function.Predicate
 
 class Test {
     val log = LoggerFactory.getLogger(Test::class.java)
+
     @Test
     fun check() {
         Flux.range(1, 20)
@@ -52,7 +53,6 @@ class Test {
         assertTrue(true)
     }
 
-
     private fun double(x: Int): Flux<Int> {
         //println("${Thread.currentThread().name} double")
         return Flux.range(1, 100).map { x + it }.delayElements(Duration.ofMillis(10000))
@@ -61,25 +61,39 @@ class Test {
 
 
     @Test
-    fun checkRetry() {
-      Flux.range(1, 10)
+    fun checkRetryWasNeutralized() {
+        Flux.range(1, 10)
             .map { x: Int ->
                 if (x == 1) {
                     throw RuntimeException()
                 }
                 x * 2
             }
-          .retryWhen(
-              RetrySpec.max(10).filter { t -> t is java.lang.RuntimeException }
-                  .doBeforeRetry {log.info("BEFORE")}
-                  .doAfterRetry {log.info("AFTER")}
-          )//onErrorContinue will neutralized retryWhen like it doesn't exist https://github.com/reactor/reactor-addons/issues/210
-          .onErrorContinue { e: Throwable?, i: Any -> println("Error For Item $i") } // comment this line for retry to work
-          .subscribe { x: Int? -> println(x) }
+            .retryWhen(
+                RetrySpec.max(10).filter { t -> t is java.lang.RuntimeException }
+                    .doBeforeRetry { log.info("BEFORE") }
+                    .doAfterRetry { log.info("AFTER") }
+            )//onErrorContinue will neutralized retryWhen like it doesn't exist https://github.com/reactor/reactor-addons/issues/210
+            .onErrorContinue { e: Throwable?, i: Any -> println("Error For Item $i") } // comment this line for retry to work
+            .subscribe { x: Int? -> println(x) }
         assertTrue(true)
     }
 
-    fun blow(counter: Int){
-        if(counter == 3 ) throw IllegalArgumentException("nanananana")
+    fun blow(counter: Int) {
+        if (counter == 3) throw IllegalArgumentException("nanananana")
+    }
+
+    data class Profile(val id: String, val stash: String)
+    data class Inventory(val stash: String, val inventory: List<String>)
+
+    data class Com(val id, val inventoty: List<String>)
+
+    @Test
+    fun testmerge() {
+        val profiles = Flux.just(Profile("1", "1"), Profile("2", "2"))
+        val inventory = Flux.just(
+            Inventory("1", listOf("A", "B", "C")),
+            Inventory("2", listOf("X", "Y", "Z"))
+        )
     }
 }
